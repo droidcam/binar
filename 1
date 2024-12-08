@@ -1,0 +1,75 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract BinaryTree {
+    struct Node {
+        uint value;
+        uint left;
+        uint right;
+        bool exists;
+    }
+
+    mapping(uint => Node) public nodes;
+    uint public root;
+    uint public size;
+
+    constructor() {
+        root = 0; // Начальный корень (0 означает отсутствие корня)
+        size = 0; // Размер дерева
+    }
+
+    // Добавление узла в дерево
+    function insert(uint _value) public {
+        if (root == 0) {
+            // Если дерево пустое
+            root = _value;
+            nodes[_value] = Node(_value, 0, 0, true);
+            size++;
+        } else {
+            _insert(root, _value);
+        }
+    }
+
+    function _insert(uint current, uint _value) internal {
+        if (_value < nodes[current].value) {
+            // Вставка в левое поддерево
+            if (nodes[current].left == 0) {
+                nodes[current].left = _value;
+                nodes[_value] = Node(_value, 0, 0, true);
+                size++;
+            } else {
+                _insert(nodes[current].left, _value);
+            }
+        } else if (_value > nodes[current].value) {
+            // Вставка в правое поддерево
+            if (nodes[current].right == 0) {
+                nodes[current].right = _value;
+                nodes[_value] = Node(_value, 0, 0, true);
+                size++;
+            } else {
+                _insert(nodes[current].right, _value);
+            }
+        }
+        // Игнорируем дублирующиеся значения
+    }
+
+    // Получение значений дерева (обход в порядке возрастания)
+    function getSortedValues() public view returns (uint[] memory) {
+        uint[] memory result = new uint[](size);
+        uint index = 0;
+        _inOrderTraversal(root, result, index);
+        return result;
+    }
+
+    function _inOrderTraversal(uint current, uint[] memory result, uint index) internal view returns (uint) {
+        if (current == 0) {
+            return index;
+        }
+
+        index = _inOrderTraversal(nodes[current].left, result, index);
+        result[index] = nodes[current].value;
+        index++;
+        index = _inOrderTraversal(nodes[current].right, result, index);
+        return index;
+    }
+}
